@@ -1,0 +1,7 @@
+\.venv
+.env
+.idea/
+best.pt
+__pycache__/
+dump.rdb
+README.md
