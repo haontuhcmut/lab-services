@@ -3,15 +3,15 @@
 ## Database & Authentication
 
 * Designed an ERD in MySQL using ORM for structured data management.
-* 
+  
 * Implemented email confirmation for signup with URLSafeTimedSerializer.
-* 
+  
 * Developed JWT authentication with access and refresh tokens.
-* 
+  
 * Integrated Redis for token storage, ensuring session invalidation on logout.
-* 
+  
 * Enabled password recovery via email verification.
-* 
+  
 * Optimized API performance by offloading background tasks to Celery workers and scaled request handling with Gunicorn, leveraging multiple CPU cores.
 
 ## Role-Based Access Control (RBAC)
