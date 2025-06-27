@@ -10,6 +10,9 @@ from sqlmodel.ext.asyncio.session import AsyncSession
 from app.db.models import YoloOutput, User
 from sqlmodel import select
 
+class PreprocessingImageInputService:
+    def __init__(self, image: bytes) -> None:
+        pass
 
 class YoloServices:
     def __init__(self):

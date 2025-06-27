@@ -1,7 +1,38 @@
 services:
+  db:
+    image: mysql:9.3
+    container_name: mysql-container-colony-project
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    
+    volumes:
+      - db_data:/var/lib/mysql
+    
+    ports:
+      - "3306:3306"
+    
+    networks:
+      - app-networks
+  
+  redis:
+    image: redis:8.0.2-alpine
+    container_name: redis-container-colony
+    command: ["redis-server", "--appendonly", "yes"] #Turn on AOF persistence
+    volumes:
+      - redis_data:/data
+    
+    ports:
+      - "6379:6379"
+    
+    networks:
+      - app-networks  
+
   fastapi:
-    build: ../../Downloads/my_app_fastapi-main
-    container_name: my-api-app
+    build: .
+    container_name: colony-detection
     volumes:
       - .:/app
     environment:
@@ -23,25 +54,44 @@ services:
       REFRESH_TOKEN_EXPIRES_DAYS_DEFAULT: ${REFRESH_TOKEN_EXPIRES_DAYS_DEFAULT}
       MODEL_PATH: ${MODEL_PATH}
     ports:
-      - "9000:9000"
+      - "8000:8000"
     networks:
-      - app-network
+      - app-networks
 
-  celery:
-    build: ../../Downloads/my_app_fastapi-main
-    container_name: celery_worker
+  celery-worker:
+    build: .
+    container_name: celery-worker-container-colony
+    depends_on:
+      - redis
     command: celery -A app.celery_tasks.c_app worker -l info
     volumes:
       - .:/app
     environment:
       REDIS_URL: ${REDIS_URL}
-    depends_on: []
+    networks:
+      - app-networks
+  celery-flower:
+    build: .
+    container_name: celery-flower-container-colony
+    depends_on:
+      - redis
+      - celery-worker
+    command: celery -A app.celery_task.c_app flower --port=5555 --address=0.0.0.0
+    environment:
+      REDIS_URL: ${REDIS_URL}
+    volumes:
+      - .:/app
+    
+    ports:
+      - "5555:5555"
 
     networks:
-      - app-network
+      - app-networks
 
 networks:
-  app-network:
+  app-networks:
     driver: bridge
 
-
+volumes:
+  db_data:
+  redis_data:
